@@ -47,12 +47,16 @@ namespace Hydra.AutoRegister
 
                 AutoRegister.PConfig = config;
 
-                Logger.doLog("[Hydra.AutoRegister] Configuration has been loaded successfully!", DebugLevel.Info);
+                Logger.doLogLang(DefaultMessage: $"Configuration has been loaded successfully!", Hydra.Config.DebugLevel.Info, Base.CurrentHydraLanguage, AutoRegister._name,
+                                 PortugueseMessage: $"A configuração foi carregada com sucesso!",
+                                 SpanishMessage: $"¡La configuración se ha cargado correctamente!");
             }
-            catch (Exception e)
+            catch (Exception ex)
             {
                 AutoRegister.PConfig = new Config();
-                Logger.doLog($"[Hydra.AutoRegister] There was an error loading the configuration file, using default configuration. => {e.Message}", DebugLevel.Critical);
+                Logger.doLogLang(DefaultMessage: $"There was a critical error loading the Hydra configuration file, using default configuration. => {ex}!", Hydra.Config.DebugLevel.Error, Base.CurrentHydraLanguage, AutoRegister._name,
+                                 PortugueseMessage: $"Ocorreu um erro ao carregar o arquivo de configuração, usando configurações padrões. => {ex}",
+                                 SpanishMessage: $"Se produjo un error crítico al cargar el archivo de configuración de Hydra, utilizando la configuración predeterminada. => {ex}");
                 Return = false;
             }
             return Return;
