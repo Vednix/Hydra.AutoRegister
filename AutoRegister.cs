@@ -16,7 +16,7 @@ namespace Hydra.AutoRegister
     [ApiVersion(2, 1)]
     public class AutoRegister : TerrariaPlugin
     {
-        public override Version Version => new Version(1, 0, 0, 0);
+        public override Version Version => new Version(1, 0, 0, 2);
         public override string Name
         {
             get { return "Hydra.AutoRegister"; }
@@ -31,8 +31,10 @@ namespace Hydra.AutoRegister
             Order = 1;
         }
         internal static Config PConfig;
+        public static string _name { get; set; }
         public override void Initialize()
         {
+            _name = Name;
             ServerApi.Hooks.NetGreetPlayer.Register(this, OnGreetPlayer);
             ServerApi.Hooks.GamePostInitialize.Register(this, Config.OnPluginInitialize);
             GeneralHooks.ReloadEvent += Config.OnReloadEvent;
@@ -66,10 +68,10 @@ namespace Hydra.AutoRegister
                     }
 
                 string newPass = CreatePassword(6);
-                Logger.doLogLang(DefaultMessage: $"[Hydra.AutoRegister] Creating a new account for: {player.Name}", Hydra.Config.DebugLevel.Info, Base.CurrentHydraLanguage,
-                                 PortugueseMessage: $"[Hydra.AutoRegister] Criando uma nova conta para: {player.Name}",
-                                 SpanishMessage: $"[Hydra.AutoRegister] Creando una nueva cuenta para el: {player.Name}",
-                                 EnglishMessageIfNotDefault: $"[Hydra.AutoRegister] Creating a new account for: {player.Name}");
+                Logger.doLogLang(DefaultMessage: $"Creating a new account for: {player.Name}", Hydra.Config.DebugLevel.Info, Base.CurrentHydraLanguage, _name,
+                                 PortugueseMessage: $"Criando uma nova conta para: {player.Name}",
+                                 SpanishMessage: $"Creando una nueva cuenta para el: {player.Name}",
+                                 EnglishMessageIfNotDefault: $"Creating a new account for: {player.Name}");
 
                 try
                 {
@@ -117,10 +119,10 @@ namespace Hydra.AutoRegister
                         player.LoginHarassed = false;
                         TShock.Users.SetUserUUID(user, player.UUID);
 
-                        Logger.doLogLang(DefaultMessage: $"[Hydra.AutoRegister] '{player.Name}' was automatically authenticated with the new registered account.", Hydra.Config.DebugLevel.Info, Base.CurrentHydraLanguage,
-                                         PortugueseMessage: $"[Hydra.AutoRegister] '{player.Name}' foi autenticado automaticamente com a nova conta cadastrada.",
-                                         SpanishMessage: $"[Hydra.AutoRegister] '{player.Name}' se autenticó automáticamente con la nueva cuenta registrada.",
-                                         EnglishMessageIfNotDefault: $"[Hydra.AutoRegister] '{player.Name}' was automatically authenticated with the new registered account.");
+                        Logger.doLogLang(DefaultMessage: $"'{player.Name}' was automatically authenticated with the new registered account.", Hydra.Config.DebugLevel.Info, Base.CurrentHydraLanguage, _name,
+                                         PortugueseMessage: $"'{player.Name}' foi autenticado automaticamente com a nova conta cadastrada.",
+                                         SpanishMessage: $"'{player.Name}' se autenticó automáticamente con la nueva cuenta registrada.",
+                                         EnglishMessageIfNotDefault: $"'{player.Name}' was automatically authenticated with the new registered account.");
 
                         TSPlayerB.SendMessage(player.Index, DefaultMessage: "Hello! We saw that you are new so we already created your account!", Color.DeepPink,
                                                             PortugueseMessage: $"Olá! Vimos que você é {(player.TPlayer.Male ? "novo" : "nova")} então já criamos a sua conta!",
@@ -134,7 +136,7 @@ namespace Hydra.AutoRegister
 
                         PlayerHooks.OnPlayerPostLogin(player);
                     }
-                } catch (Exception ex) { Logger.doLog(ex.ToString(), Hydra.Config.DebugLevel.Critical); }
+                } catch (Exception ex) { Logger.doLog(ex.ToString(), Hydra.Config.DebugLevel.Critical, _name); }
             });
         }
         protected override void Dispose(bool disposing)
