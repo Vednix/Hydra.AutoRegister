@@ -71,67 +71,70 @@ namespace Hydra.AutoRegister
                                  SpanishMessage: $"[Hydra.AutoRegister] Creando una nueva cuenta para el: {player.Name}",
                                  EnglishMessageIfNotDefault: $"[Hydra.AutoRegister] Creating a new account for: {player.Name}");
 
-                TShock.Users.AddUser(new User(
-                    player.Name,
-                    BCrypt.Net.BCrypt.HashPassword(newPass.Trim()),
-                    player.UUID,
-                    PConfig.SelectRegisterGroupAccordingGender ? (player.TPlayer.Male ? PConfig.DefaultGroup : PConfig.FemaleDefaultGroup) : PConfig.DefaultGroup,
-                    DateTime.UtcNow.ToString("s"),
-                    DateTime.UtcNow.ToString("s"),
-                    ""));
-
-                //auto login
-                User user = TShock.Users.GetUserByName(player.Name);
-
-                if (user.VerifyPassword(newPass))
+                try
                 {
-                    player.PlayerData = TShock.CharacterDB.GetPlayerData(player, user.ID);
+                    TShock.Users.AddUser(new User(
+                        player.Name,
+                        BCrypt.Net.BCrypt.HashPassword(newPass.Trim()),
+                        player.UUID,
+                        PConfig.SelectRegisterGroupAccordingGender ? (player.TPlayer.Male ? PConfig.DefaultGroup : PConfig.FemaleDefaultGroup) : PConfig.DefaultGroup,
+                        DateTime.UtcNow.ToString("s"),
+                        DateTime.UtcNow.ToString("s"),
+                        ""));
 
-                    var group = TShock.Utils.GetGroup(user.Group);
+                    //auto login
+                    User user = TShock.Users.GetUserByName(player.Name);
 
-                    player.Group = group;
-                    player.tempGroup = null;
-                    player.User = user;
-                    player.IsLoggedIn = true;
-                    player.IgnoreActionsForInventory = "none";
-
-                    if (Main.ServerSideCharacter)
+                    if (user.VerifyPassword(newPass))
                     {
-                        if (player.HasPermission(TShockAPI.Permissions.bypassssc))
+                        player.PlayerData = TShock.CharacterDB.GetPlayerData(player, user.ID);
+
+                        var group = TShock.Utils.GetGroup(user.Group);
+
+                        player.Group = group;
+                        player.tempGroup = null;
+                        player.User = user;
+                        player.IsLoggedIn = true;
+                        player.IgnoreActionsForInventory = "none";
+
+                        if (Main.ServerSideCharacter)
                         {
-                            player.PlayerData.CopyCharacter(player);
-                            TShock.CharacterDB.InsertPlayerData(player);
+                            if (player.HasPermission(TShockAPI.Permissions.bypassssc))
+                            {
+                                player.PlayerData.CopyCharacter(player);
+                                TShock.CharacterDB.InsertPlayerData(player);
+                            }
+                            player.PlayerData.RestoreCharacter(player);
                         }
-                        player.PlayerData.RestoreCharacter(player);
+                        player.LoginFailsBySsi = false;
+
+                        if (player.HasPermission(TShockAPI.Permissions.ignorestackhackdetection))
+                            player.IgnoreActionsForCheating = "none";
+
+                        if (player.HasPermission(TShockAPI.Permissions.usebanneditem))
+                            player.IgnoreActionsForDisabledArmor = "none";
+
+                        player.LoginHarassed = false;
+                        TShock.Users.SetUserUUID(user, player.UUID);
+
+                        Logger.doLogLang(DefaultMessage: $"[Hydra.AutoRegister] '{player.Name}' was automatically authenticated with the new registered account.", Hydra.Config.DebugLevel.Info, Base.CurrentHydraLanguage,
+                                         PortugueseMessage: $"[Hydra.AutoRegister] '{player.Name}' foi autenticado automaticamente com a nova conta cadastrada.",
+                                         SpanishMessage: $"[Hydra.AutoRegister] '{player.Name}' se autenticó automáticamente con la nueva cuenta registrada.",
+                                         EnglishMessageIfNotDefault: $"[Hydra.AutoRegister] '{player.Name}' was automatically authenticated with the new registered account.");
+
+                        TSPlayerB.SendMessage(player.Index, DefaultMessage: "Hello! We saw that you are new so we already created your account!", Color.DeepPink,
+                                                            PortugueseMessage: $"Olá! Vimos que você é {(player.TPlayer.Male ? "novo" : "nova")} então já criamos a sua conta!",
+                                                            SpanishMessage: $"Hola! Vimos que eres {(player.TPlayer.Male ? "nuevo" : "nueva")}, así que ya creamos tu cuenta",
+                                                            EnglishMessageIfNotDefault: "Hello! We saw that you are new so we already created your account!");
+
+                        TSPlayerB.SendMessage(player.Index, DefaultMessage: $"Your password is [c/ffa500:{newPass}], change it with [c/ffd700:/password].", Color.Red,
+                                                            PortugueseMessage: $"Sua senha é [c/ffa500:{newPass}], altere-a com [c/ffd700:/senha].",
+                                                            SpanishMessage: $"Tu contraseña es [c/ffa500:{newPass}], cambiarlo con [c/ffd700:contraseña].",
+                                                            EnglishMessageIfNotDefault: $"Your password is [c/ffa500:{newPass}], change it with [c/ffd700:/password].");
+
+                        PlayerHooks.OnPlayerPostLogin(player);
                     }
-                    player.LoginFailsBySsi = false;
-
-                    if (player.HasPermission(TShockAPI.Permissions.ignorestackhackdetection))
-                        player.IgnoreActionsForCheating = "none";
-
-                    if (player.HasPermission(TShockAPI.Permissions.usebanneditem))
-                        player.IgnoreActionsForDisabledArmor = "none";
-
-                    player.LoginHarassed = false;
-                    TShock.Users.SetUserUUID(user, player.UUID);
-
-                    Logger.doLogLang(DefaultMessage: $"[Hydra.AutoRegister] '{player.Name}' was automatically authenticated with the new registered account.", Hydra.Config.DebugLevel.Info, Base.CurrentHydraLanguage,
-                                     PortugueseMessage: $"[Hydra.AutoRegister] '{player.Name}' foi autenticado automaticamente com a nova conta cadastrada.",
-                                     SpanishMessage: $"[Hydra.AutoRegister] '{player.Name}' se autenticó automáticamente con la nueva cuenta registrada.",
-                                     EnglishMessageIfNotDefault: $"[Hydra.AutoRegister] '{player.Name}' was automatically authenticated with the new registered account.");
-
-                    TSPlayerB.SendMessage(player.Index, DefaultMessage: "Hello! We saw that you are new so we already created your account!", Color.DeepPink,
-                                                        PortugueseMessage: $"Olá! Vimos que você é {(player.TPlayer.Male ? "novo" : "nova")} então já criamos a sua conta!",
-                                                        SpanishMessage: $"Hola! Vimos que eres {(player.TPlayer.Male ? "nuevo" : "nueva")}, así que ya creamos tu cuenta",
-                                                        EnglishMessageIfNotDefault: "Hello! We saw that you are new so we already created your account!");
-
-                    TSPlayerB.SendMessage(player.Index, DefaultMessage: $"Your password is [c/ffa500:{newPass}], change it with [c/ffd700:/password].", Color.Red,
-                                                        PortugueseMessage: $"Sua senha é [c/ffa500:{newPass}], altere-a com [c/ffd700:/senha].",
-                                                        SpanishMessage: $"Tu contraseña es [c/ffa500:{newPass}], cambiarlo con [c/ffd700:contraseña].",
-                                                        EnglishMessageIfNotDefault: $"Your password is [c/ffa500:{newPass}], change it with [c/ffd700:/password].");
-
-                    PlayerHooks.OnPlayerPostLogin(player);
-                }
+                } catch (Exception ex) { Logger.doLog(ex.ToString(), Hydra.Config.DebugLevel.Critical); }
             });
         }
         protected override void Dispose(bool disposing)

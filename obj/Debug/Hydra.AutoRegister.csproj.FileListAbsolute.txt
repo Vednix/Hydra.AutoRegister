@@ -7,3 +7,4 @@ C:\Users\fabio\source\repos\Hydra.AutoRegister\Hydra.AutoRegister\obj\Debug\Hydr
 C:\Users\fabio\source\repos\Hydra.AutoRegister\Hydra.AutoRegister\obj\Debug\Hydra.AutoRegister.csproj.CopyComplete
 C:\Users\fabio\source\repos\Hydra.AutoRegister\Hydra.AutoRegister\obj\Debug\Hydra.AutoRegister.dll
 C:\Users\fabio\source\repos\Hydra.AutoRegister\Hydra.AutoRegister\obj\Debug\Hydra.AutoRegister.pdb
+C:\Users\fabio\source\repos\Hydra.AutoRegister\Hydra.AutoRegister\obj\Debug\Hydra.AutoRegister.csprojAssemblyReference.cache
